@@ -1,0 +1,39 @@
+{
+  "name": "Idlescape utilities (alpha)",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Quality of life improvements for Idlescape. Contact 11tinic in-game or on the discord for feedback or bug reports.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "browser_action": {
+    "default_icon": "icons/icon19.png",
+    "default_title": "Idlescape utility",
+    "default_popup": "src/popup.html"
+  },
+  "permissions": [
+    "https://idlescape.com/*",
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://idlescape.com/*"
+      ],
+      "css": [
+        "src/inject/inject.css"
+      ]
+    },
+    {
+      "matches": [
+        "https://idlescape.com/*"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ]
+    }
+  ]
+}
