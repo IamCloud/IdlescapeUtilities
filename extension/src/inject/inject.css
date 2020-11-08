@@ -1,0 +1,83 @@
+/**
+ * Place your custom CSS styles here.
+ **/
+ 
+ .extIcon {
+    height: fit-content;
+    padding-left:20px;
+    height:30px;
+ }
+.chatHighlight {
+    color: yellow;
+    font-weight: bold;
+}
+
+/*MODAL*/
+/* The Modal (background) */
+#IU-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content */
+  .IU-modal-content {
+    position: relative;
+    background-color:black;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 800px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+  }
+  
+  /* Add Animation */
+  @-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0} 
+    to {top:0; opacity:1}
+  }
+  
+  @keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+  }
+  
+  /* The Close Button */
+  .IU-close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .IU-close:hover,
+  .IU-close:focus {
+    color: red;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  .IU-modal-header {
+    padding: 2px 16px;
+    background-color: black;
+    color: red;
+  }
+  
+  .IU-modal-body {padding: 2px 16px;}
+
+  .IU-checkbox {
+      opacity:1!important;
+      pointer-events: all!important;
+  }
