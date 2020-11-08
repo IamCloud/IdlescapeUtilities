@@ -17,6 +17,11 @@
 ## How to use
 On the right of the player count you have an image "IU". You can click on it to disable/enable features.
 
-## TODO
-* Fix Uncaught Error: Extension context invalidated.
+## TODO (In no particular order)
+* Runecrafting - Exp/hour and left to lvl.
+* Runecrafting - Show number of runes per craft (using effective level)
+* Runecrafting - Show how many runes you will get if you craft all your essence.
+* Inventory items quantity display in full. (Just like gold and heat but for items in inventory)
+* Improve UI of the extension.
+* Make a firefox version.
 * Publish to Chrome store.
