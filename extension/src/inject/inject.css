@@ -4,8 +4,10 @@
  
  .extIcon {
     height: fit-content;
-    padding-left:20px;
+    margin-left:20px;
     height:30px;
+    border:1px solid yellow;
+    border-radius: 10px;
  }
 
 /*MODAL*/
@@ -76,4 +78,5 @@
   .IU-checkbox {
       opacity:1!important;
       pointer-events: all!important;
+      margin-left: .5rem!important;
   }
