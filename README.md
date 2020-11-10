@@ -5,6 +5,7 @@
 1. Display gold in full. (1,920,000 instead of 1M) 
 1. Display heat in full.
 1. Experience/hour and time to level for mining/foraging/fishing/smithing.
+1. Experience to level and time to empty current essence in Runecrafting.
 
 ## How to install
 1. Download the latest zip file here: [Releases](https://github.com/IamCloud/IdlescapeUtilities/releases)
