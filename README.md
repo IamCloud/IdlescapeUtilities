@@ -1,11 +1,11 @@
 # IdlescapeUtilities
  Chrome extension for Idlescape Quality of life.
- 
+ ![Overview](./fullscreen.png?raw=true "Overview")
 ## Features:
-1. Display gold and heat in full. (1,920,000 instead of 1M) 
-1. Experience/hour and time to level for mining/foraging/fishing/smithing.
-1. Time left displayed in progress bars of farming seeds.
-1. Experience to level and time to empty current essence in Runecrafting.
+1. Display gold and heat in full. (1,920,000 instead of 1M) ![GoldHeatImage](./GoldHeat.PNG?raw=true "Gold and heat in full")
+1. Experience/hour and time to level for mining/foraging/fishing/smithing. ![Mining Exp](./MiningExp.PNG?raw=true "Mining experience")
+1. Time left displayed in progress bars of farming seeds. ![Farming](./farming.PNG?raw=true "Farming")
+1. Experience to level and time to empty current essence in Runecrafting. ![Runecrafting](./Runecrafting.PNG?raw=true "Runecrafting")
 
 ## How to install
 1. Download the latest zip file here: [Releases](https://github.com/IamCloud/IdlescapeUtilities/releases)
