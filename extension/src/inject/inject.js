@@ -1,6 +1,7 @@
 var gold = "";
 var heat = "";
 var username = "";
+var farmingTimesDisplay = true;
 var CONST_FISHES = [new Fish("Shrimp", 5, 59.84),
 new Fish("Anchovy", 25, 40.16),
 new Fish("Trout", 50, 59.84),
@@ -41,7 +42,7 @@ var readyStateCheckInterval = setInterval(function () {
 					window.clearInterval(intervalId);
 					callback.call(this);
 				}
-			}, 500);
+			}, 1000);
 		}
 
 		onReady(LoadScript);
@@ -134,6 +135,17 @@ function LoadScript() {
 
 		}
 	});
+
+	//Farming
+	chrome.storage.sync.get(['farmingTimeDisplay'], function (result) {
+		if (result === undefined) {
+			chrome.storage.sync.set({ "farmingTimeDisplay": true });
+			farmingTimesDisplay = true;
+		} else {
+			farmingTimesDisplay = result.farmingTimeDisplay;
+		}
+	});
+	
 	//Chat highlight
 	// chrome.storage.sync.get(['chatMentionsHighlight'], function(result) {
 	// 	var chatMentionsHighlight = false;
@@ -226,7 +238,7 @@ function playerAreaChanged(target, observer) {
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
 		AttachExpLeftObserver("miningHeader", AverageExpPerTick);
 		AttachTimeObserver("miningHeader", AverageExpPerTick);
-	} else if (target.classList.contains("theme-foraging")) {
+	} else if (target.classList.contains("theme-foraging") && !target.firstChild.firstChild.classList.contains("farming-container")) {
 		AverageExpPerTick = [10.38, 18.25, 8.08, 38.26, 31.50, 17.94, 52.28, 49.73];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("foragingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
@@ -249,6 +261,8 @@ function playerAreaChanged(target, observer) {
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("runecraftingHeader").querySelectorAll("span")[4].textContent));
 		displayRunecraftingExpCalcs([100], remainingExpToLevel);
 		AttachEssenceObserver([100]);
+	} else if (farmingTimesDisplay && target.classList.contains("theme-foraging") && target.firstChild.firstChild.classList.contains("farming-container")) {
+		displayFarmingTimesLeft();
 	}
 }
 
@@ -429,6 +443,44 @@ function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 	}
 }
 
+function displayFarmingTimesLeft() {
+	var progressBars = document.getElementsByClassName("farming-grid")[0].querySelectorAll(".farming-progress-bar");
+	setFarmingProgressBarContents(progressBars);
+
+	var estimateTimeObserver = new MutationObserver(function (mutations, observer) {
+		setFarmingProgressBarContents(progressBars);
+		estimateTimeObserver.disconnect();
+		estimateTimeObserver.observe(progressBars[0], {
+			attributes: true
+		});
+	});
+	estimateTimeObserver.observe(progressBars[0], {
+		attributes: true
+	});
+}
+
+function setFarmingProgressBarContents(progressBars) {
+	for (var i = 0; i < progressBars.length; i++) {
+		setFarmingProgressBarContent(progressBars[i], i);
+	}
+}
+function setFarmingProgressBarContent(progressBar, index) {
+	progressBar.setAttribute("IU-progress" + index, "");
+	progressBar.setAttribute("IU-progressIndex", index);
+	var currentVal = progressBar.getAttribute("value");
+	var currentMax = progressBar.getAttribute("max");
+	var minsLeft = currentMax - currentVal;
+
+	var alreadyExistStyle = document.getElementById("IU-progress" + index);
+	if (alreadyExistStyle) {
+		alreadyExistStyle.innerHTML = "[IU-progress" + index + "]::before { content: '" + minsLeft + "m'}";
+	} else {
+		var styleElem = progressBar.appendChild(document.createElement("style"));
+		styleElem.id = "IU-progress" + index;
+		styleElem.innerHTML = "[IU-progress" + index + "]::before { content: '" + minsLeft + "m'}";
+	}
+}
+
 function AttachEssenceObserver(avrExpPerTick) {
 	Array.from(document.querySelectorAll(".essence-list > div")).forEach(function (element) {
 		var essenceObserver = new MutationObserver(function (mutations, observer) {
@@ -515,6 +567,9 @@ function initModalScript() {
 	chrome.storage.sync.get(['expCalcDisplay'], function (result) {
 		document.getElementById("expcalc").checked = result.expCalcDisplay;
 	});
+	chrome.storage.sync.get(['farmingTimeDisplay'], function (result) {
+		document.getElementById("farmingtimes").checked = result.farmingTimeDisplay;
+	});
 	// chrome.storage.sync.get(['chatMentionsHighlight'], function(result) {
 	//     document.getElementById("chatMentionsHighlight").checked = result.chatMentionsHighlight;
 	// });
@@ -530,6 +585,11 @@ function initModalScript() {
 	});
 	document.getElementById("expcalc").addEventListener("input", function (checkbox) {
 		chrome.storage.sync.set({ "expCalcDisplay": checkbox.target.checked }, function () {
+			userPrefChanged();
+		});
+	});
+	document.getElementById("farmingtimes").addEventListener("input", function (checkbox) {
+		chrome.storage.sync.set({ "farmingTimeDisplay": checkbox.target.checked }, function () {
 			userPrefChanged();
 		});
 	});

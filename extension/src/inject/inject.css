@@ -80,3 +80,13 @@
       pointer-events: all!important;
       margin-left: .5rem!important;
   }
+
+  progress.farming-timer.farming-progress-bar::before {
+    position: absolute;
+    top: 0;
+    display: flex;
+    color: white;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+  }
