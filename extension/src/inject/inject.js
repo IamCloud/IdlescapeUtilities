@@ -2,6 +2,7 @@ var gold = "";
 var heat = "";
 var username = "";
 var farmingTimesDisplay = true;
+var GLB_essenceNeeded = 400;
 var CONST_FISHES = [new Fish("Shrimp", 5, 59.84),
 new Fish("Anchovy", 25, 40.16),
 new Fish("Trout", 50, 59.84),
@@ -145,7 +146,7 @@ function LoadScript() {
 			farmingTimesDisplay = result.farmingTimeDisplay;
 		}
 	});
-	
+
 	//Chat highlight
 	// chrome.storage.sync.get(['chatMentionsHighlight'], function(result) {
 	// 	var chatMentionsHighlight = false;
@@ -259,6 +260,7 @@ function playerAreaChanged(target, observer) {
 	} else if (target.classList.contains("theme-runecrafting")) {
 		AverageExpPerTick = [100];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("runecraftingHeader").querySelectorAll("span")[4].textContent));
+		addRunecraftingPercentInputField();
 		displayRunecraftingExpCalcs([100], remainingExpToLevel);
 		AttachEssenceObserver([100]);
 	} else if (farmingTimesDisplay && target.classList.contains("theme-foraging") && target.firstChild.firstChild.classList.contains("farming-container")) {
@@ -413,34 +415,70 @@ function displayFishingExpCalcs(remainingExpToLevel) {
 	}
 }
 
-function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
-	var craftingList = document.querySelector(".crafting-grid").children;
-	for (var i = 0; i < craftingList.length; i++) {
-		var wrapper = craftingList[i];
-		var timeTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].firstChild;
-		var neededEssenceTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].children[1];
-		var neededEssences = parseFloat(neededEssenceTooltip.querySelector("span").textContent);
-		var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[i].querySelector("span").textContent.replace(",", ""));
-
-		var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
-		var avrExpPerTick = AverageExpPerTick[0];
-		if (document.getElementsByClassName("buff-donation")[0]) {
-			avrExpPerTick = avrExpPerTick * 1.20;
+function addRunecraftingPercentInputField() {
+	var info = document.getElementsByClassName("runecrafting-info")[0];
+	var nextLine = document.createElement("br");
+	info.appendChild(nextLine);
+	var label = document.createElement("span");
+	label.innerHTML = "Runecrafting echant percent (requires refresh to update): ";
+	info.appendChild(label);
+	var input = document.createElement("input");
+	input.classList.add("IU-input");
+	input.type = "number";
+	input.min = "0";
+	input.max = "100";
+	chrome.storage.sync.get(['runecraftingPercent'], function (result) {
+		if (result === undefined) {
+			chrome.storage.sync.set({ "runecraftingPercent": 0 });
+		} else {
+			input.value = result.runecraftingPercent;
 		}
-		expPerHour = parseInt(((3600 / seconds) * avrExpPerTick).toFixed(2));
+	});
+	input.addEventListener("change", function (e) {
+		chrome.storage.sync.set({ "runecraftingPercent": e.target.value });
+	});
+	info.appendChild(input);
+}
+function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
+	chrome.storage.sync.get(['runecraftingPercent'], function (result) {
+		var craftingList = document.querySelector(".crafting-grid").children;
+		for (var i = 0; i < craftingList.length; i++) {
+			var wrapper = craftingList[i];
+			var timeTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].firstChild;
+			var neededEssenceTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].children[1];
+			var neededEssences = parseFloat(neededEssenceTooltip.querySelector("span").textContent);
 
-		var timeLeftToEmptyEssence = timeTooltip.cloneNode(true);
 
-		timeLeftToEmptyEssence.firstChild.removeChild(timeLeftToEmptyEssence.firstChild.childNodes[0]);
-		var timeLeftElem = timeLeftToEmptyEssence.cloneNode(true);
-		timeLeftToEmptyEssence.setAttribute("IU-class", "timelefttoempty");
-		timeLeftToEmptyEssence.querySelector("span").textContent = getTimeLeftText((((currentEssences / neededEssences) * seconds) / 60) / 60)  + " to empty";
-		timeTooltip.parentElement.appendChild(timeLeftToEmptyEssence);
 
-		timeLeftElem.setAttribute("IU-class", "timeleft");
-		timeLeftElem.querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / expPerHour) + " to lvl";
-		timeTooltip.parentElement.appendChild(timeLeftElem);
-	}
+			var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[i].querySelector("span").textContent.replace(",", ""));
+
+			var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
+			var avrExpPerTick = AverageExpPerTick[0];
+			if (document.getElementsByClassName("buff-donation")[0]) {
+				avrExpPerTick = avrExpPerTick * 1.20;
+			}
+			expPerHour = parseInt(((3600 / seconds) * avrExpPerTick).toFixed(2));
+
+			var timeLeftToEmptyEssence = timeTooltip.cloneNode(true);
+
+			timeLeftToEmptyEssence.firstChild.removeChild(timeLeftToEmptyEssence.firstChild.childNodes[0]);
+			var timeLeftElem = timeLeftToEmptyEssence.cloneNode(true);
+			timeLeftToEmptyEssence.setAttribute("IU-class", "timelefttoempty");
+
+			if (result !== undefined) {
+				neededEssences = (neededEssences * (100 - result.runecraftingPercent)) / 100;
+			}
+			timeLeftToEmptyEssence.querySelector("span").textContent = getTimeLeftText((((currentEssences / neededEssences) * seconds) / 60) / 60) + " to empty";
+			timeTooltip.parentElement.appendChild(timeLeftToEmptyEssence);
+
+
+
+			timeLeftElem.setAttribute("IU-class", "timeleft");
+			timeLeftElem.querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / expPerHour) + " to lvl";
+			timeTooltip.parentElement.appendChild(timeLeftElem);
+			GLB_essenceNeeded = neededEssences;
+		}
+	});
 }
 
 function displayFarmingTimesLeft() {
@@ -499,14 +537,13 @@ function AttachEssenceObserver(avrExpPerTick) {
 			var essenceList = trueTarget.parentElement;
 			var currentIndex = Array.prototype.slice.call(essenceList.children).indexOf(trueTarget);
 			var wrapper = essenceList.previousElementSibling.children[currentIndex];
-			var neededEssenceTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].children[1];
-			var neededEssences = parseFloat(neededEssenceTooltip.querySelector("span").textContent);
 			var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[currentIndex].querySelector("span").textContent.replace(",", ""));
 			var timeTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].firstChild;
 			var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 
 			var timeLeftsForEmpty = essenceList.previousElementSibling.children[currentIndex].querySelector("[IU-class='timelefttoempty']");
-			timeLeftsForEmpty.querySelector("span").textContent = getTimeLeftText((((currentEssences / neededEssences) * seconds) / 60) / 60)  + " to empty";
+
+			timeLeftsForEmpty.querySelector("span").textContent = getTimeLeftText((((currentEssences / GLB_essenceNeeded) * seconds) / 60) / 60) + " to empty";
 		});
 		essenceObserver.observe(element, {
 			characterData: true,
@@ -541,16 +578,13 @@ function getTimeLeftText(timeleftInHours) {
 	var minutes = Math.floor((decimalTime / 60));
 	decimalTime = decimalTime - (minutes * 60);
 	var seconds = Math.round(decimalTime);
-	if(hours < 10)
-	{
+	if (hours < 10) {
 		hours = "0" + hours;
 	}
-	if(minutes < 10)
-	{
+	if (minutes < 10) {
 		minutes = "0" + minutes;
 	}
-	if(seconds < 10)
-	{
+	if (seconds < 10) {
 		seconds = "0" + seconds;
 	}
 	return hours + ":" + minutes + ":" + seconds + " left";
