@@ -237,26 +237,21 @@ function playerAreaChanged(target, observer) {
 		AverageExpPerTick = [2.6, 4.66, 10.25, 18.61, 22.80, 48.60, 53.50, 67.05];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("miningHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
-		AttachExpLeftObserver("miningHeader", AverageExpPerTick);
-		AttachTimeObserver("miningHeader", AverageExpPerTick);
+		AttachScrollingTextObservers("miningHeader", AverageExpPerTick);
 	} else if (target.classList.contains("theme-foraging") && !target.firstChild.firstChild.classList.contains("farming-container")) {
 		AverageExpPerTick = [10.38, 18.25, 8.08, 38.26, 31.50, 17.94, 52.28, 49.73];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("foragingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
-		AttachExpLeftObserver("foragingHeader", AverageExpPerTick);
-		AttachTimeObserver("foragingHeader", AverageExpPerTick);
+		AttachScrollingTextObservers("foragingHeader", AverageExpPerTick);
 	} else if (target.classList.contains("theme-smithing")) {
 		AverageExpPerTick = [10, 100, 100, 200, 300, 1000, 1500];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("smithingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
-		AttachExpLeftObserver("smithingHeader", AverageExpPerTick);
-		AttachTimeObserver("smithingHeader", AverageExpPerTick);
+		AttachScrollingTextObservers("smithingHeader", AverageExpPerTick);
 	} else if (target.classList.contains("theme-fishing")) {
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("fishingHeader").querySelectorAll("span")[4].textContent));
 		displayFishingExpCalcs(remainingExpToLevel);
-		AttachExpLeftObserver("fishingHeader");
-		AttachFishingChanceObserver("fishingHeader");
-		AttachTimeObserver("fishingHeader");
+		AttachScrollingTextObservers("fishingHeader");
 	} else if (target.classList.contains("theme-runecrafting")) {
 		AverageExpPerTick = [100];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("runecraftingHeader").querySelectorAll("span")[4].textContent));
@@ -268,20 +263,28 @@ function playerAreaChanged(target, observer) {
 	}
 }
 
-function AttachExpLeftObserver(headerId, averageExpPerTick) {
+var GLB_extraPercentExp = 1;
+function AttachScrollingTextObservers(headerId, averageExpPerTick) {
 	Array.from(document.getElementsByClassName("scrolling-text")).forEach(function (element) {
 		scrollingTextObserver = new MutationObserver(function (mutations, observer) {
 			var timelefts = document.querySelectorAll("[IU-class='timeleft']");
+			var expPerHours = document.querySelectorAll("[IU-class='expperhour']");
 			var remainingExpToLevel = parseInt(extractIntFromString(document.getElementById(headerId).querySelectorAll("span")[4].textContent));
 			for (var i = 0; i < timelefts.length; i++) {
 				var wrapper = document.getElementsByClassName("resource-wrapper")[i];
+
+				setGlobalExtraPercentExp();
+
 				if (headerId === "fishingHeader") {
 					var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
 					var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 					var percentTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[2];
 					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1))));
+					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)))) + " exp/h ";
 				} else {
-					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i]));
+					var extraExp = (averageExpPerTick[i] * GLB_extraPercentExp) / 100;
+					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i] + extraExp));
+					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getExpPerHour(wrapper, averageExpPerTick[i] + extraExp)) + " exp/h ";
 				}
 			}
 		});
@@ -291,63 +294,25 @@ function AttachExpLeftObserver(headerId, averageExpPerTick) {
 	});
 }
 
-function AttachFishingChanceObserver(headerId) {
-	Array.from(document.querySelectorAll(".resource-required-resources div:nth-of-type(3)")).forEach(function (element) {
-		var fishingChanceObserver = new MutationObserver(function (mutations, observer) {
-			var timelefts = document.querySelectorAll("[IU-class='timeleft']");
-			var expPerHours = document.querySelectorAll("[IU-class='expperhour']");
-			var remainingExpToLevel = parseInt(extractIntFromString(document.getElementById(headerId).querySelectorAll("span")[4].textContent));
-			for (var i = 0; i < timelefts.length; i++) {
-				var wrapper = document.getElementsByClassName("resource-wrapper")[i];
-				var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
-				var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
-				var percentTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[2];
-				timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1))));
-				expPerHours[i].querySelector("span").textContent = numberWithSpaces(getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)))) + " exp/h ";
-			}
-		});
-		fishingChanceObserver.observe(element, {
-			characterData: true,
-			subtree: true
-		});
-	});
-}
-
-function AttachTimeObserver(headerId, averageExpPerTick) {
-	Array.from(document.querySelectorAll(".resource-required-resources div:nth-of-type(2)")).forEach(function (element) {
-		var timeObserver = new MutationObserver(function (mutations, observer) {
-			var timelefts = document.querySelectorAll("[IU-class='timeleft']");
-			var expPerHours = document.querySelectorAll("[IU-class='expperhour']");
-			var remainingExpToLevel = parseInt(extractIntFromString(document.getElementById(headerId).querySelectorAll("span")[4].textContent));
-			for (var i = 0; i < timelefts.length; i++) {
-				var wrapper = document.getElementsByClassName("resource-wrapper")[i];
-				var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
-				var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
-				var percentTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[2];
-				if (headerId === "fishingHeader") {
-					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1))));
-					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)))) + " exp/h ";
-				} else {
-					timelefts[i].querySelector("span").textContent = getTimeLeftText((remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i])));
-					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getExpPerHour(wrapper, averageExpPerTick[i])) + " exp/h ";
-				}
-			}
-		});
-		timeObserver.observe(element, {
-			characterData: true,
-			subtree: true
-		});
-	});
+function setGlobalExtraPercentExp() {
+	var activeScrolling = document.getElementsByClassName("scrolling-text-active")[0];				
+	if (activeScrolling) {
+		var scrollingText = document.getElementsByClassName("scrolling-text-active")[0].textContent;
+		var normalExp = scrollingText.split(" ")[0];
+		var extraExpElem = scrollingText.split("(+")[1];
+		if (extraExpElem) {
+			let extraExpText = extraExpElem.substring(0, extraExpElem.length - 4);
+			GLB_extraPercentExp = (extraExpText / normalExp) * 100;
+		} else {
+			GLB_extraPercentExp = 1;
+		}
+	}
 }
 
 function getExpPerHour(wrapper, averageExpPerTick) {
 	var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
 	var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
-	var avrExpPerTick = averageExpPerTick;
-	if (document.getElementsByClassName("buff-donation")[0]) {
-		avrExpPerTick = avrExpPerTick * 1.20;
-	}
-	return parseInt(((3600 / seconds) * avrExpPerTick).toFixed(2));
+	return parseInt(((3600 / seconds) * averageExpPerTick).toFixed(2));
 }
 
 function extractIntFromString(text) {
@@ -369,7 +334,8 @@ function displayExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 		var wrapper = document.getElementsByClassName("resource-wrapper")[i];
 		var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
 
-		var expPerHour = getExpPerHour(wrapper, AverageExpPerTick[i]);
+		var extraExp = (AverageExpPerTick[i] * GLB_extraPercentExp) / 100;
+		var expPerHour = getExpPerHour(wrapper, AverageExpPerTick[i] + extraExp);
 
 		var expPerHourElem = timeTooltip.parentElement.cloneNode(true);
 
@@ -558,7 +524,8 @@ function getFishingExpHour(currentZone, seconds, zonePercent) {
 	for (var i = 0; i < currentZone.fishes.length; i++) {
 		var currentFishChance = (currentZone.fishes[i].percentChance * zonePercent) / 100;
 		var lootPerHour = (3600 / seconds) * (currentFishChance / 100);
-		totalExp += lootPerHour * currentZone.fishes[i].exp;
+		var currentFishExp = currentZone.fishes[i].exp + (currentZone.fishes[i].exp * GLB_extraPercentExp) / 100
+		totalExp += lootPerHour * currentFishExp;
 	}
 	return Math.round(totalExp);
 }
