@@ -320,12 +320,11 @@ function AttachScrollingTextObservers(headerId, averageExpPerTick) {
 function AttachMarketplaceObserver() {
 
 	marketplaceObserver = new MutationObserver(function (mutations, observer) {
-		if (mutations[0].target.classList.contains("marketplace-history")) {
+		if (mutations[0].target.classList.contains("marketplace-history") && mutations[0].target.children.length > 1) {
 			displayMarketHistoryUnitCost(mutations[0].target);
+			console.log("play-area-container");
+			marketplaceObserver.disconnect();
 		}
-		// marketplaceObserver.observe(document.getElementsByClassName("play-area-container")[0], {
-		// 	attributes: true, childList: true, subtree: true
-		// });
 	});
 	marketplaceObserver.observe(document.getElementsByClassName("play-area-container")[0], {
 		attributes: true, childList: true, subtree: true
@@ -424,7 +423,8 @@ function addRunecraftingPercentInputField() {
 	var nextLine = document.createElement("br");
 	info.appendChild(nextLine);
 	var label = document.createElement("span");
-	label.innerHTML = "Runecrafting echant percent (requires refresh to update): ";
+	label.innerHTML = "Runecrafting enchant percent (requires refresh to update): ";
+	label.style.color = "deepskyblue";
 	info.appendChild(label);
 	var input = document.createElement("input");
 	input.classList.add("IU-input");
@@ -524,24 +524,47 @@ function setFarmingProgressBarContent(progressBar, index) {
 }
 
 function displayMarketHistoryUnitCost(target) {
-	var table = target;
-	if (table.children.length > 1) {
-		let head = table.querySelector(".marketplace-history-header");
-		var newHeader = document.createElement("div");
-		newHeader.className = "IU-marketplace-history-header-cu";
-		newHeader.innerHTML = "Cost/Unit";
-		head.insertBefore(newHeader, head.children[4]);
 
-		var items = table.querySelectorAll(".marketplace-history-item");
-		for (var i = 0; i < items.length; i++) {
-			var item = items[i];
-			var totalAmount = extractIntFromString(item.querySelector(".marketplace-history-item-amount").textContent);
-			var totalCost = extractIntFromString(item.querySelector(".marketplace-history-item-price").textContent);
-			var newCostUnitElem = document.createElement("div");
-			newCostUnitElem.className = "IU-marketplace-history-item-costunit";
-			newCostUnitElem.innerHTML = numberWithSpaces(totalCost / totalAmount);
-			item.insertBefore(newCostUnitElem, item.children[4]);
+
+	var table = target;
+	//Delete all
+	if (table.querySelector(".IU-marketplace-history-header-cu")) {
+		table.firstChild.removeChild(table.firstChild.querySelector(".IU-marketplace-history-header-cu"));
+		for (var i = 0; i < table.querySelectorAll(".marketplace-history-item").length; i++) {
+			var currentRow = table.querySelectorAll(".marketplace-history-item")[i];
+			if (currentRow.querySelector(".IU-marketplace-history-item-costunit")) {
+				currentRow.removeChild(currentRow.querySelector(".IU-marketplace-history-item-costunit"));
+			}
 		}
+	}
+
+	//Add
+	let head = table.querySelector(".marketplace-history-header");
+	var newHeader = document.createElement("div");
+	newHeader.className = "IU-marketplace-history-header-cu";
+	newHeader.innerHTML = "Cost/Unit";
+	head.insertBefore(newHeader, head.children[4]);
+
+	var items = table.querySelectorAll(".marketplace-history-item");
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var totalAmount = extractIntFromString(item.querySelector(".marketplace-history-item-amount").textContent);
+		var totalCost = extractIntFromString(item.querySelector(".marketplace-history-item-price").textContent);
+		var newCostUnitElem = document.createElement("div");
+		newCostUnitElem.className = "IU-marketplace-history-item-costunit";
+		newCostUnitElem.innerHTML = numberWithSpaces(totalCost / totalAmount);
+		item.insertBefore(newCostUnitElem, item.children[4]);
+	}
+
+	if (document.querySelectorAll(".marketplace-history-container")[0]) {
+		var attachHistoryPageObserver = new MutationObserver(function (mutations, observer) {
+			console.log("marketplace-history-container");
+			attachHistoryPageObserver.disconnect();
+			displayMarketHistoryUnitCost(table);
+		});
+		attachHistoryPageObserver.observe(document.getElementsByClassName("marketplace-history-container")[0], {
+			childList: true, attributes: true, subtree: true
+		});
 	}
 }
 
