@@ -58,7 +58,7 @@ function LoadScript() {
 	//Gold
 	chrome.storage.sync.get(['goldFullDisplay'], function (result) {
 		var goldFullDisplay = false;
-		if (result === undefined) {
+		if (result.goldFullDisplay === undefined) {
 			chrome.storage.sync.set({ "goldFullDisplay": true });
 			goldFullDisplay = true;
 		} else {
@@ -87,7 +87,7 @@ function LoadScript() {
 	//Heat
 	chrome.storage.sync.get(['heatFullDisplay'], function (result) {
 		var heatFullDisplay = false;
-		if (result === undefined) {
+		if (result.heatFullDisplay === undefined) {
 			chrome.storage.sync.set({ "heatFullDisplay": true });
 			heatFullDisplay = true;
 		} else {
@@ -113,7 +113,7 @@ function LoadScript() {
 
 	//EXP calc
 	chrome.storage.sync.get(['expCalcDisplay'], function (result) {
-		if (result === undefined) {
+		if (result.expCalcDisplay === undefined) {
 			chrome.storage.sync.set({ "expCalcDisplay": true });
 			GLB_DisplayExpCalc = true;
 		} else {
@@ -122,9 +122,15 @@ function LoadScript() {
 		addPlayerAreaObserverIfNeeded();
 	});
 
+	//Set default runecrafting
+	chrome.storage.sync.get(['runecraftingPercent'], function (result) {
+		if (result.runecraftingPercent === undefined) {
+			chrome.storage.sync.set({ "runecraftingPercent": 0 });
+		}
+	});
 	//Farming
 	chrome.storage.sync.get(['farmingTimeDisplay'], function (result) {
-		if (result === undefined) {
+		if (result.farmingTimeDisplay === undefined) {
 			chrome.storage.sync.set({ "farmingTimeDisplay": true });
 			GLB_FarmingTimeDisplay = true;
 		} else {
@@ -135,7 +141,7 @@ function LoadScript() {
 
 	//Market History
 	chrome.storage.sync.get(['marketHistoryByUnit'], function (result) {
-		if (result === undefined) {
+		if (result.marketHistoryByUnit === undefined) {
 			chrome.storage.sync.set({ "marketHistoryByUnit": true });
 			GLB_MarketHistoryUnitDisplay = true;
 		} else {
@@ -182,7 +188,7 @@ function addPlayerAreaObserverIfNeeded() {
 			// ...
 		});
 		playAreaObserver.observe(observedNode, {
-			attributes: true
+			attributes: true, childList: true
 		});
 
 		playerAreaChanged(observedNode);
@@ -264,6 +270,8 @@ function playerAreaChanged(target, observer) {
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("foragingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
 		AttachScrollingTextObservers("foragingHeader", AverageExpPerTick);
+	} else if (GLB_FarmingTimeDisplay && target.classList.contains("theme-foraging") && target.firstChild.firstChild.classList.contains("farming-container")) {
+		displayFarmingTimesLeft();
 	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-smithing")) {
 		AverageExpPerTick = [10, 100, 100, 200, 300, 1000, 1500];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("smithingHeader").querySelectorAll("span")[4].textContent));
@@ -279,8 +287,6 @@ function playerAreaChanged(target, observer) {
 		addRunecraftingPercentInputField();
 		displayRunecraftingExpCalcs([100], remainingExpToLevel);
 		AttachEssenceObserver([100]);
-	} else if (GLB_FarmingTimeDisplay && target.classList.contains("theme-foraging") && target.firstChild.firstChild.classList.contains("farming-container")) {
-		displayFarmingTimesLeft();
 	} else if (GLB_MarketHistoryUnitDisplay && target.classList.contains("theme-default") && target.querySelector(".marketplace-buy-info")) {
 		AttachMarketplaceObserver();
 	}
@@ -409,7 +415,7 @@ function displayFishingExpCalcs(remainingExpToLevel) {
 		expPerHourElem.firstChild.removeChild(expPerHourElem.firstChild.childNodes[0]);
 		var timeLeftElem = expPerHourElem.cloneNode(true);
 		expPerHourElem.setAttribute("IU-class", "expperhour");
-		expPerHourElem.querySelector("span").textContent = numberWithSpaces(expPerHour) + " exp/h";
+		expPerHourElem.querySelector("span").textContent = numberWithSpaces(expPerHour.toFixed(0)) + " exp/h";
 		timeTooltip.parentElement.parentElement.appendChild(expPerHourElem);
 
 		timeLeftElem.setAttribute("IU-class", "timeleft");
@@ -432,10 +438,10 @@ function addRunecraftingPercentInputField() {
 	input.min = "0";
 	input.max = "100";
 	chrome.storage.sync.get(['runecraftingPercent'], function (result) {
-		if (result === undefined) {
+		if (result.runecraftingPercent === undefined) {
 			chrome.storage.sync.set({ "runecraftingPercent": 0 });
 		} else {
-			input.value = result.runecraftingPercent;
+				input.value = result.runecraftingPercent;
 		}
 	});
 	input.addEventListener("change", function (e) {
@@ -487,18 +493,20 @@ function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 
 function displayFarmingTimesLeft() {
 	var progressBars = document.getElementsByClassName("farming-grid")[0].querySelectorAll(".farming-progress-bar");
-	setFarmingProgressBarContents(progressBars);
-
-	var estimateTimeObserver = new MutationObserver(function (mutations, observer) {
+	if (progressBars.length > 0) {
 		setFarmingProgressBarContents(progressBars);
-		estimateTimeObserver.disconnect();
+
+		var estimateTimeObserver = new MutationObserver(function (mutations, observer) {
+			setFarmingProgressBarContents(progressBars);
+			estimateTimeObserver.disconnect();
+			estimateTimeObserver.observe(progressBars[0], {
+				attributes: true
+			});
+		});
 		estimateTimeObserver.observe(progressBars[0], {
 			attributes: true
 		});
-	});
-	estimateTimeObserver.observe(progressBars[0], {
-		attributes: true
-	});
+	}
 }
 
 function setFarmingProgressBarContents(progressBars) {
@@ -610,7 +618,7 @@ function getFishingExpHour(currentZone, seconds, zonePercent) {
 		var currentFishExp = currentZone.fishes[i].exp + (currentZone.fishes[i].exp * GLB_extraPercentExp) / 100
 		totalExp += lootPerHour * currentFishExp;
 	}
-	return Math.round(totalExp);
+	return parseInt(totalExp).toFixed(0);
 }
 
 
