@@ -10,6 +10,8 @@
     * ![Farming](./farming.PNG?raw=true "Farming")
 1. Experience to level and time to empty current essence in Runecrafting. Updates every craft. You can manually enter your runecrafting enchant to have the correct calculations.
     * ![Runecrafting](./Runecrafting.PNG?raw=true "Runecrafting")
+1. Marketplace history cost/unit
+    * ![Marketplace](./MarketplaceHistory.PNG?raw=true "Market")
 
 ## How to install
 1. Download the latest zip file here: [Releases](https://github.com/IamCloud/IdlescapeUtilities/releases)
@@ -23,6 +25,5 @@
 On the right of the player count you have an image "IU". You can click on it to disable/enable features.
 
 ## TODO (In no particular order)
-* Marketplace history - Display cost/unit.
 * Runecrafting - Show number of runes per craft (using effective level)
 * Runecrafting - Show how many runes you will get if you craft all your essence.

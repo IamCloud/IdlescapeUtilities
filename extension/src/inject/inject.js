@@ -1,7 +1,9 @@
 var gold = "";
 var heat = "";
 var username = "";
-var farmingTimesDisplay = true;
+var GLB_FarmingTimeDisplay = true;
+var GLB_DisplayExpCalc = true;
+var GLB_MarketHistoryUnitDisplay = true;
 var GLB_essenceNeeded = 400;
 var CONST_FISHES = [new Fish("Shrimp", 5, 59.84),
 new Fish("Anchovy", 25, 40.16),
@@ -111,41 +113,39 @@ function LoadScript() {
 
 	//EXP calc
 	chrome.storage.sync.get(['expCalcDisplay'], function (result) {
-		var expCalcDisplay = false;
 		if (result === undefined) {
 			chrome.storage.sync.set({ "expCalcDisplay": true });
-			expCalcDisplay = true;
+			GLB_DisplayExpCalc = true;
 		} else {
-			expCalcDisplay = result.expCalcDisplay;
+			GLB_DisplayExpCalc = result.expCalcDisplay;
 		}
-		if (expCalcDisplay) {
-
-
-			var observedNode = document.getElementsByClassName("play-area")[0];
-
-			var playAreaObserver = new MutationObserver(function (mutations, observer) {
-				// fired when a mutation occurs
-				playerAreaChanged(mutations[0].target, observer);
-				// ...
-			});
-			playAreaObserver.observe(observedNode, {
-				attributes: true
-			});
-
-			playerAreaChanged(observedNode);
-
-		}
+		addPlayerAreaObserverIfNeeded();
 	});
 
 	//Farming
 	chrome.storage.sync.get(['farmingTimeDisplay'], function (result) {
 		if (result === undefined) {
 			chrome.storage.sync.set({ "farmingTimeDisplay": true });
-			farmingTimesDisplay = true;
+			GLB_FarmingTimeDisplay = true;
 		} else {
-			farmingTimesDisplay = result.farmingTimeDisplay;
+			GLB_FarmingTimeDisplay = result.farmingTimeDisplay;
 		}
+		addPlayerAreaObserverIfNeeded();
 	});
+
+	//Market History
+	chrome.storage.sync.get(['marketHistoryByUnit'], function (result) {
+		if (result === undefined) {
+			chrome.storage.sync.set({ "marketHistoryByUnit": true });
+			GLB_MarketHistoryUnitDisplay = true;
+		} else {
+			GLB_MarketHistoryUnitDisplay = result.marketHistoryByUnit;
+		}
+		addPlayerAreaObserverIfNeeded();
+	});
+
+
+
 
 	//Chat highlight
 	// chrome.storage.sync.get(['chatMentionsHighlight'], function(result) {
@@ -169,6 +169,25 @@ function LoadScript() {
 
 	createPopup();
 	addExtensionPopupButton();
+}
+
+var playerAreaObserverAlreadySet = false;
+function addPlayerAreaObserverIfNeeded() {
+	if (!playerAreaObserverAlreadySet && (GLB_DisplayExpCalc || GLB_FarmingTimeDisplay || GLB_MarketHistoryUnitDisplay)) {
+		var observedNode = document.getElementsByClassName("play-area")[0];
+
+		var playAreaObserver = new MutationObserver(function (mutations, observer) {
+			// fired when a mutation occurs
+			playerAreaChanged(mutations[0].target, observer);
+			// ...
+		});
+		playAreaObserver.observe(observedNode, {
+			attributes: true
+		});
+
+		playerAreaChanged(observedNode);
+		playerAreaObserverAlreadySet = true;
+	}
 }
 
 function addExtensionPopupButton() {
@@ -229,37 +248,41 @@ function chatChanged(mutation, observer) {
 }
 
 var scrollingTextObserver;
+var marketplaceObserver;
 function playerAreaChanged(target, observer) {
 	if (scrollingTextObserver) { scrollingTextObserver.disconnect(); }
+	if (marketplaceObserver) { marketplaceObserver.disconnect(); }
 	var AverageExpPerTick;
 	var remainingExpToLevel;
-	if (target.classList.contains("theme-mining")) {
+	if (GLB_DisplayExpCalc && target.classList.contains("theme-mining")) {
 		AverageExpPerTick = [2.6, 4.66, 10.25, 18.61, 22.80, 48.60, 53.50, 67.05];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("miningHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
 		AttachScrollingTextObservers("miningHeader", AverageExpPerTick);
-	} else if (target.classList.contains("theme-foraging") && !target.firstChild.firstChild.classList.contains("farming-container")) {
+	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-foraging") && !target.firstChild.firstChild.classList.contains("farming-container")) {
 		AverageExpPerTick = [10.38, 18.25, 8.08, 38.26, 31.50, 17.94, 52.28, 49.73];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("foragingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
 		AttachScrollingTextObservers("foragingHeader", AverageExpPerTick);
-	} else if (target.classList.contains("theme-smithing")) {
+	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-smithing")) {
 		AverageExpPerTick = [10, 100, 100, 200, 300, 1000, 1500];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("smithingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
 		AttachScrollingTextObservers("smithingHeader", AverageExpPerTick);
-	} else if (target.classList.contains("theme-fishing")) {
+	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-fishing")) {
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("fishingHeader").querySelectorAll("span")[4].textContent));
 		displayFishingExpCalcs(remainingExpToLevel);
 		AttachScrollingTextObservers("fishingHeader");
-	} else if (target.classList.contains("theme-runecrafting")) {
+	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-runecrafting")) {
 		AverageExpPerTick = [100];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("runecraftingHeader").querySelectorAll("span")[4].textContent));
 		addRunecraftingPercentInputField();
 		displayRunecraftingExpCalcs([100], remainingExpToLevel);
 		AttachEssenceObserver([100]);
-	} else if (farmingTimesDisplay && target.classList.contains("theme-foraging") && target.firstChild.firstChild.classList.contains("farming-container")) {
+	} else if (GLB_FarmingTimeDisplay && target.classList.contains("theme-foraging") && target.firstChild.firstChild.classList.contains("farming-container")) {
 		displayFarmingTimesLeft();
+	} else if (GLB_MarketHistoryUnitDisplay && target.classList.contains("theme-default") && target.querySelector(".marketplace-buy-info")) {
+		AttachMarketplaceObserver();
 	}
 }
 
@@ -294,8 +317,23 @@ function AttachScrollingTextObservers(headerId, averageExpPerTick) {
 	});
 }
 
+function AttachMarketplaceObserver() {
+
+	marketplaceObserver = new MutationObserver(function (mutations, observer) {
+		if (mutations[0].target.classList.contains("marketplace-history")) {
+			displayMarketHistoryUnitCost(mutations[0].target);
+		}
+		// marketplaceObserver.observe(document.getElementsByClassName("play-area-container")[0], {
+		// 	attributes: true, childList: true, subtree: true
+		// });
+	});
+	marketplaceObserver.observe(document.getElementsByClassName("play-area-container")[0], {
+		attributes: true, childList: true, subtree: true
+	});
+}
+
 function setGlobalExtraPercentExp() {
-	var activeScrolling = document.getElementsByClassName("scrolling-text-active")[0];				
+	var activeScrolling = document.getElementsByClassName("scrolling-text-active")[0];
 	if (activeScrolling) {
 		var scrollingText = document.getElementsByClassName("scrolling-text-active")[0].textContent;
 		var normalExp = scrollingText.split(" ")[0];
@@ -485,6 +523,28 @@ function setFarmingProgressBarContent(progressBar, index) {
 	}
 }
 
+function displayMarketHistoryUnitCost(target) {
+	var table = target;
+	if (table.children.length > 1) {
+		let head = table.querySelector(".marketplace-history-header");
+		var newHeader = document.createElement("div");
+		newHeader.className = "IU-marketplace-history-header-cu";
+		newHeader.innerHTML = "Cost/Unit";
+		head.insertBefore(newHeader, head.children[4]);
+
+		var items = table.querySelectorAll(".marketplace-history-item");
+		for (var i = 0; i < items.length; i++) {
+			var item = items[i];
+			var totalAmount = extractIntFromString(item.querySelector(".marketplace-history-item-amount").textContent);
+			var totalCost = extractIntFromString(item.querySelector(".marketplace-history-item-price").textContent);
+			var newCostUnitElem = document.createElement("div");
+			newCostUnitElem.className = "IU-marketplace-history-item-costunit";
+			newCostUnitElem.innerHTML = numberWithSpaces(totalCost / totalAmount);
+			item.insertBefore(newCostUnitElem, item.children[4]);
+		}
+	}
+}
+
 function AttachEssenceObserver(avrExpPerTick) {
 	Array.from(document.querySelectorAll(".essence-list > div")).forEach(function (element) {
 		var essenceObserver = new MutationObserver(function (mutations, observer) {
@@ -571,9 +631,9 @@ function initModalScript() {
 	chrome.storage.sync.get(['farmingTimeDisplay'], function (result) {
 		document.getElementById("farmingtimes").checked = result.farmingTimeDisplay;
 	});
-	// chrome.storage.sync.get(['chatMentionsHighlight'], function(result) {
-	//     document.getElementById("chatMentionsHighlight").checked = result.chatMentionsHighlight;
-	// });
+	chrome.storage.sync.get(['marketHistoryByUnit'], function (result) {
+		document.getElementById("marketHistoryByUnit").checked = result.marketHistoryByUnit;
+	});
 	document.getElementById("golddisplay").addEventListener("input", function (checkbox) {
 		chrome.storage.sync.set({ "goldFullDisplay": checkbox.target.checked }, function () {
 			userPrefChanged();
@@ -586,6 +646,11 @@ function initModalScript() {
 	});
 	document.getElementById("expcalc").addEventListener("input", function (checkbox) {
 		chrome.storage.sync.set({ "expCalcDisplay": checkbox.target.checked }, function () {
+			userPrefChanged();
+		});
+	});
+	document.getElementById("marketHistoryByUnit").addEventListener("input", function (checkbox) {
+		chrome.storage.sync.set({ "marketHistoryByUnit": checkbox.target.checked }, function () {
 			userPrefChanged();
 		});
 	});

@@ -96,3 +96,9 @@
     background-color: white!important;
     height: auto!important;
   }
+
+  .IU-marketplace-history-item-costunit, .IU-marketplace-history-header-cu {
+    width:100px;
+    border-right: 2px solid #2c2c2c;
+    text-align: center;
+  }
