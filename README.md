@@ -24,6 +24,7 @@
 ## How to use
 On the right of the player count you have an image "IU". You can click on it to disable/enable features.
 
-## TODO (In no particular order)
+## Ideas (In no particular order)
 * Runecrafting - Show number of runes per craft (using effective level)
 * Runecrafting - Show how many runes you will get if you craft all your essence.
+* Add exp/hour and other information in combat.

@@ -1,7 +1,13 @@
-/**
- * Place your custom CSS styles here.
- **/
+
+
+/*OVERRIDES*/
+.marketplace-buy-item-top {
+  position:sticky;
+  top: 0;
+  z-index:5;
+}
  
+/*CUSTOM*/
  .extIcon {
     height: fit-content;
     margin-left:20px;
