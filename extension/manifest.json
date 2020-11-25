@@ -1,46 +1,49 @@
 {
-  "name": "Idlescape utilities",
-  "version": "0.6.2",
-  "manifest_version": 2,
-  "description": "Quality of life improvements for Idlescape. Contact 11tinic in-game or on the discord for feedback or bug reports.",
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+  "name":"Idlescape utilities",
+  "version":"0.6.3",
+  "manifest_version":2,
+  "description":"Quality of life improvements for Idlescape.",
+  "icons":{
+     "16":"icons/icon16.png",
+     "48":"icons/icon48.png",
+     "128":"icons/icon128.png"
   },
-  "default_locale": "en",
-  "page_action": {
-    "default_icon": "icons/icon19.png",
-    "default_title": "Idlescape utilities",
-    "default_popup": "src/popup/popup.html"
+  "default_locale":"en",
+  "page_action":{
+     "default_icon":"icons/icon19.png",
+     "default_title":"Idlescape utilities",
+     "default_popup":"src/popup/popup.html"
   },
-  "permissions": [
-    "https://idlescape.com/*",
-    "https://www.idlescape.com/*",
-    "storage" 
+  "permissions":[
+     "https://idlescape.com/*",
+     "https://www.idlescape.com/*",
+     "https://dev.idlescape.com/*",
+     "storage"
   ],
-  "web_accessible_resources": [
-    "icons/icon48.png",
-    "src/popup/popup.html"
+  "web_accessible_resources":[
+     "icons/icon48.png",
+     "src/popup/popup.html"
   ],
-  "content_scripts": [
-    {
-      "matches": [
-        "https://idlescape.com/*",
-        "https://www.idlescape.com/*"        
-      ],
-      "css": [
-        "src/inject/inject.css"
-      ]
-    },
-    {
-      "matches": [
-        "https://idlescape.com/*",
-        "https://www.idlescape.com/*"
-      ],
-      "js": [
-        "src/inject/inject.js"
-      ]
-    }
+  "content_scripts":[
+     {
+        "matches":[
+           "https://idlescape.com/*",
+           "https://www.idlescape.com/*",
+           "https://dev.idlescape.com/*"
+        ],
+        "css":[
+           "src/inject/inject.css"
+        ]
+     },
+     {
+        "matches":[
+           "https://idlescape.com/*",
+           "https://www.idlescape.com/*",
+           "https://dev.idlescape.com/*"
+        ],
+        "js":[
+           "src/inject/inject.js"
+        ]
+     }
   ]
 }

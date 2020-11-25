@@ -30,7 +30,6 @@ function FishingZone(name, fishesIndeces) {
 		this.fishes.push(CONST_FISHES[fishesIndeces[i]]);
 	}
 }
-
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 
@@ -55,11 +54,12 @@ var readyStateCheckInterval = setInterval(function () {
 
 
 function LoadScript() {
+
 	//Gold
-	chrome.storage.sync.get(['goldFullDisplay'], function (result) {
+	chrome.storage.local.get(['goldFullDisplay'], function (result) {
 		var goldFullDisplay = false;
 		if (result.goldFullDisplay === undefined) {
-			chrome.storage.sync.set({ "goldFullDisplay": true });
+			chrome.storage.local.set({ "goldFullDisplay": true });
 			goldFullDisplay = true;
 		} else {
 			goldFullDisplay = result.goldFullDisplay;
@@ -85,10 +85,10 @@ function LoadScript() {
 	});
 
 	//Heat
-	chrome.storage.sync.get(['heatFullDisplay'], function (result) {
+	chrome.storage.local.get(['heatFullDisplay'], function (result) {
 		var heatFullDisplay = false;
 		if (result.heatFullDisplay === undefined) {
-			chrome.storage.sync.set({ "heatFullDisplay": true });
+			chrome.storage.local.set({ "heatFullDisplay": true });
 			heatFullDisplay = true;
 		} else {
 			heatFullDisplay = result.heatFullDisplay;
@@ -112,9 +112,9 @@ function LoadScript() {
 	});
 
 	//EXP calc
-	chrome.storage.sync.get(['expCalcDisplay'], function (result) {
+	chrome.storage.local.get(['expCalcDisplay'], function (result) {
 		if (result.expCalcDisplay === undefined) {
-			chrome.storage.sync.set({ "expCalcDisplay": true });
+			chrome.storage.local.set({ "expCalcDisplay": true });
 			GLB_DisplayExpCalc = true;
 		} else {
 			GLB_DisplayExpCalc = result.expCalcDisplay;
@@ -123,15 +123,15 @@ function LoadScript() {
 	});
 
 	//Set default runecrafting
-	chrome.storage.sync.get(['runecraftingPercent'], function (result) {
+	chrome.storage.local.get(['runecraftingPercent'], function (result) {
 		if (result.runecraftingPercent === undefined) {
-			chrome.storage.sync.set({ "runecraftingPercent": 0 });
+			chrome.storage.local.set({ "runecraftingPercent": 0 });
 		}
 	});
 	//Farming
-	chrome.storage.sync.get(['farmingTimeDisplay'], function (result) {
+	chrome.storage.local.get(['farmingTimeDisplay'], function (result) {
 		if (result.farmingTimeDisplay === undefined) {
-			chrome.storage.sync.set({ "farmingTimeDisplay": true });
+			chrome.storage.local.set({ "farmingTimeDisplay": true });
 			GLB_FarmingTimeDisplay = true;
 		} else {
 			GLB_FarmingTimeDisplay = result.farmingTimeDisplay;
@@ -140,9 +140,9 @@ function LoadScript() {
 	});
 
 	//Market History
-	chrome.storage.sync.get(['marketHistoryByUnit'], function (result) {
+	chrome.storage.local.get(['marketHistoryByUnit'], function (result) {
 		if (result.marketHistoryByUnit === undefined) {
-			chrome.storage.sync.set({ "marketHistoryByUnit": true });
+			chrome.storage.local.set({ "marketHistoryByUnit": true });
 			GLB_MarketHistoryUnitDisplay = true;
 		} else {
 			GLB_MarketHistoryUnitDisplay = result.marketHistoryByUnit;
@@ -154,10 +154,10 @@ function LoadScript() {
 
 
 	//Chat highlight
-	// chrome.storage.sync.get(['chatMentionsHighlight'], function(result) {
+	// chrome.storage.local.get(['chatMentionsHighlight'], function(result) {
 	// 	var chatMentionsHighlight = false;
 	// 	if (result !== true) {
-	// 		chrome.storage.sync.set({"chatMentionsHighlight": false});
+	// 		chrome.storage.local.set({"chatMentionsHighlight": false});
 	// 		chatMentionsHighlight = false;
 	// 	} else {
 	// 		chatMentionsHighlight = result.chatMentionsHighlight;
@@ -200,7 +200,11 @@ function addExtensionPopupButton() {
 	var userOnline = document.getElementById("usersOnline");
 	var img = document.createElement('img');
 	img.className = "extIcon";
-	img.src = chrome.extension.getURL('/icons/icon48.png');
+	if (window.browser) {
+		img.src = browser.runtime.getURL('/icons/icon48.png');
+	} else {
+		img.src = chrome.runtime.getURL('/icons/icon48.png');
+	}
 	img.alt = "IU";
 	img.addEventListener("click", function () {
 		openPopup();
@@ -218,7 +222,11 @@ function closePopup() {
 }
 function createPopup() {
 	var request = new XMLHttpRequest();
-	request.open('GET', chrome.extension.getURL('src/popup/popup.html'), true);
+	if (window.browser) {
+		request.open('GET', browser.runtime.getURL('src/popup/popup.html'), true);
+	} else {
+		request.open('GET', chrome.runtime.getURL('src/popup/popup.html'), true);
+	}
 
 	request.onload = function () {
 		if (this.status >= 200 && this.status < 400) {
@@ -328,7 +336,6 @@ function AttachMarketplaceObserver() {
 	marketplaceObserver = new MutationObserver(function (mutations, observer) {
 		if (mutations[0].target.classList.contains("marketplace-history") && mutations[0].target.children.length > 1) {
 			displayMarketHistoryUnitCost(mutations[0].target);
-			console.log("play-area-container");
 			marketplaceObserver.disconnect();
 		}
 	});
@@ -429,7 +436,7 @@ function addRunecraftingPercentInputField() {
 	var nextLine = document.createElement("br");
 	info.appendChild(nextLine);
 	var label = document.createElement("span");
-	label.innerHTML = "Runecrafting enchant percent (requires refresh to update): ";
+	label.innerText = "Runecrafting enchant percent (requires refresh to update): ";
 	label.style.color = "deepskyblue";
 	info.appendChild(label);
 	var input = document.createElement("input");
@@ -437,20 +444,20 @@ function addRunecraftingPercentInputField() {
 	input.type = "number";
 	input.min = "0";
 	input.max = "100";
-	chrome.storage.sync.get(['runecraftingPercent'], function (result) {
+	chrome.storage.local.get(['runecraftingPercent'], function (result) {
 		if (result.runecraftingPercent === undefined) {
-			chrome.storage.sync.set({ "runecraftingPercent": 0 });
+			chrome.storage.local.set({ "runecraftingPercent": 0 });
 		} else {
-				input.value = result.runecraftingPercent;
+			input.value = result.runecraftingPercent;
 		}
 	});
 	input.addEventListener("change", function (e) {
-		chrome.storage.sync.set({ "runecraftingPercent": e.target.value });
+		chrome.storage.local.set({ "runecraftingPercent": e.target.value });
 	});
 	info.appendChild(input);
 }
 function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
-	chrome.storage.sync.get(['runecraftingPercent'], function (result) {
+	chrome.storage.local.get(['runecraftingPercent'], function (result) {
 		var craftingList = document.querySelector(".crafting-grid").children;
 		for (var i = 0; i < craftingList.length; i++) {
 			var wrapper = craftingList[i];
@@ -522,12 +529,14 @@ function setFarmingProgressBarContent(progressBar, index) {
 	var minsLeft = currentMax - currentVal;
 
 	var alreadyExistStyle = document.getElementById("IU-progress" + index);
+	var css = "[IU-progress" + index + "]::before { content: '" + minsLeft + "m'}";
 	if (alreadyExistStyle) {
-		alreadyExistStyle.innerHTML = "[IU-progress" + index + "]::before { content: '" + minsLeft + "m'}";
+		alreadyExistStyle.innerHTML = '';
+		alreadyExistStyle.appendChild(document.createTextNode(css));
 	} else {
 		var styleElem = progressBar.appendChild(document.createElement("style"));
 		styleElem.id = "IU-progress" + index;
-		styleElem.innerHTML = "[IU-progress" + index + "]::before { content: '" + minsLeft + "m'}";
+		styleElem.appendChild(document.createTextNode(css));
 	}
 }
 
@@ -550,7 +559,7 @@ function displayMarketHistoryUnitCost(target) {
 	let head = table.querySelector(".marketplace-history-header");
 	var newHeader = document.createElement("div");
 	newHeader.className = "IU-marketplace-history-header-cu";
-	newHeader.innerHTML = "Cost/Unit";
+	newHeader.innerText = "Cost/Unit";
 	head.insertBefore(newHeader, head.children[4]);
 
 	var items = table.querySelectorAll(".marketplace-history-item");
@@ -560,13 +569,12 @@ function displayMarketHistoryUnitCost(target) {
 		var totalCost = extractIntFromString(item.querySelector(".marketplace-history-item-price").textContent);
 		var newCostUnitElem = document.createElement("div");
 		newCostUnitElem.className = "IU-marketplace-history-item-costunit";
-		newCostUnitElem.innerHTML = numberWithSpaces(totalCost / totalAmount);
+		newCostUnitElem.innerText = numberWithSpaces(totalCost / totalAmount);
 		item.insertBefore(newCostUnitElem, item.children[4]);
 	}
 
 	if (document.querySelectorAll(".marketplace-history-container")[0]) {
 		var attachHistoryPageObserver = new MutationObserver(function (mutations, observer) {
-			console.log("marketplace-history-container");
 			attachHistoryPageObserver.disconnect();
 			displayMarketHistoryUnitCost(table);
 		});
@@ -650,43 +658,44 @@ function getTimeLeftText(timeleftInHours) {
 
 //Modal script
 function initModalScript() {
-	chrome.storage.sync.get(['goldFullDisplay'], function (result) {
+	chrome.storage.local.get(['goldFullDisplay'], function (result) {
 		document.getElementById("golddisplay").checked = result.goldFullDisplay;
+
 	});
-	chrome.storage.sync.get(['heatFullDisplay'], function (result) {
+	chrome.storage.local.get(['heatFullDisplay'], function (result) {
 		document.getElementById("heatdisplay").checked = result.heatFullDisplay;
 	});
-	chrome.storage.sync.get(['expCalcDisplay'], function (result) {
+	chrome.storage.local.get(['expCalcDisplay'], function (result) {
 		document.getElementById("expcalc").checked = result.expCalcDisplay;
 	});
-	chrome.storage.sync.get(['farmingTimeDisplay'], function (result) {
+	chrome.storage.local.get(['farmingTimeDisplay'], function (result) {
 		document.getElementById("farmingtimes").checked = result.farmingTimeDisplay;
 	});
-	chrome.storage.sync.get(['marketHistoryByUnit'], function (result) {
+	chrome.storage.local.get(['marketHistoryByUnit'], function (result) {
 		document.getElementById("marketHistoryByUnit").checked = result.marketHistoryByUnit;
 	});
 	document.getElementById("golddisplay").addEventListener("input", function (checkbox) {
-		chrome.storage.sync.set({ "goldFullDisplay": checkbox.target.checked }, function () {
+		chrome.storage.local.set({ "goldFullDisplay": checkbox.target.checked }, function () {
 			userPrefChanged();
 		});
 	});
 	document.getElementById("heatdisplay").addEventListener("input", function (checkbox) {
-		chrome.storage.sync.set({ "heatFullDisplay": checkbox.target.checked }, function () {
+		chrome.storage.local.set({ "heatFullDisplay": checkbox.target.checked }, function () {
 			userPrefChanged();
 		});
 	});
 	document.getElementById("expcalc").addEventListener("input", function (checkbox) {
-		chrome.storage.sync.set({ "expCalcDisplay": checkbox.target.checked }, function () {
+		chrome.storage.local.set({ "expCalcDisplay": checkbox.target.checked }, function () {
 			userPrefChanged();
 		});
 	});
 	document.getElementById("marketHistoryByUnit").addEventListener("input", function (checkbox) {
-		chrome.storage.sync.set({ "marketHistoryByUnit": checkbox.target.checked }, function () {
+		chrome.storage.local.set({ "marketHistoryByUnit": checkbox.target.checked }, function () {
 			userPrefChanged();
 		});
 	});
 	document.getElementById("farmingtimes").addEventListener("input", function (checkbox) {
-		chrome.storage.sync.set({ "farmingTimeDisplay": checkbox.target.checked }, function () {
+		chrome.storage.local.set({ "farmingTimeDisplay": checkbox.target.checked }, function () {
 			userPrefChanged();
 		});
 	});
@@ -695,6 +704,5 @@ function initModalScript() {
 		closePopup();
 	});
 	function userPrefChanged() {
-
 	}
 }
