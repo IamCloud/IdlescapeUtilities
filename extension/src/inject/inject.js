@@ -467,7 +467,7 @@ function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 
 
 
-			var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[i].querySelector("span").textContent.replace(",", ""));
+			var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[i].querySelector("span").textContent.replace(/,/g, ""));
 
 			var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 			var avrExpPerTick = AverageExpPerTick[0];
@@ -602,7 +602,7 @@ function AttachEssenceObserver(avrExpPerTick) {
 			var essenceList = trueTarget.parentElement;
 			var currentIndex = Array.prototype.slice.call(essenceList.children).indexOf(trueTarget);
 			var wrapper = essenceList.previousElementSibling.children[currentIndex];
-			var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[currentIndex].querySelector("span").textContent.replace(",", ""));
+			var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[currentIndex].querySelector("span").textContent.replace(/,/g, ""));
 			var timeTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].firstChild;
 			var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 

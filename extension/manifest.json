@@ -1,6 +1,6 @@
 {
   "name":"Idlescape utilities",
-  "version":"0.6.3",
+  "version":"0.6.4",
   "manifest_version":2,
   "description":"Quality of life improvements for Idlescape.",
   "icons":{
