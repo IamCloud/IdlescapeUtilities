@@ -12,7 +12,6 @@
     * ![Runecrafting](./Runecrafting.PNG?raw=true "Runecrafting")
 1. Marketplace history cost/unit
     * ![Marketplace](./MarketplaceHistory.PNG?raw=true "Market")
-1. Back and refresh button now follows when you scroll down.
 
 ## How to install
 You can simply download the app in the chrome store: https://chrome.google.com/webstore/detail/idlescape-utilities/pcmnipemclfhflggbglfaampaakhfcdp
@@ -28,7 +27,6 @@ Or if you prefer getting newer verions faster you can follow these steps.
 On the right of the player count you have an image "IU". You can click on it to disable/enable features.
 
 ## Ideas (In no particular order)
-* Runecrafting - Improve user experience.
 * Runecrafting - Show number of runes per craft (using effective level)
 * Runecrafting - Show how many runes you will get if you craft all your essence.
 * Add exp/hour and other information in combat.

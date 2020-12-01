@@ -320,7 +320,7 @@ function AttachScrollingTextObservers(headerId, averageExpPerTick) {
 					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)))) + " exp/h ";
 				} else {
 					var extraExp = (averageExpPerTick[i] * GLB_extraPercentExp) / 100;
-					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i] + extraExp)) + " left";
+					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i] + extraExp) + " left");
 					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getExpPerHour(wrapper, averageExpPerTick[i] + extraExp)) + " exp/h ";
 				}
 			}
@@ -422,7 +422,7 @@ function displayFishingExpCalcs(remainingExpToLevel) {
 		expPerHourElem.firstChild.removeChild(expPerHourElem.firstChild.childNodes[0]);
 		var timeLeftElem = expPerHourElem.cloneNode(true);
 		expPerHourElem.setAttribute("IU-class", "expperhour");
-		expPerHourElem.querySelector("span").textContent = numberWithSpaces(expPerHour.toFixed(0)) + " exp/h";
+		expPerHourElem.querySelector("span").textContent = numberWithSpaces(parseInt(expPerHour).toFixed(0)) + " exp/h";
 		timeTooltip.parentElement.parentElement.appendChild(expPerHourElem);
 
 		timeLeftElem.setAttribute("IU-class", "timeleft");
@@ -467,7 +467,7 @@ function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 
 
 
-			var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[i].querySelector("span").textContent.replace(/,/g, ""));
+			var currentEssences = getCurrentEssences(i);
 
 			var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 			var avrExpPerTick = AverageExpPerTick[0];
@@ -496,6 +496,16 @@ function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 			GLB_essenceNeeded = neededEssences;
 		}
 	});
+}
+
+function getCurrentEssences(index) {
+	var textContent = document.getElementsByClassName("essence-list")[0].children[index].querySelector("span").textContent;	
+	if (textContent.includes("M")) {
+		let value = parseFloat(textContent.split(" ")[0]);
+		return parseInt(value * 1000000);
+	} else {
+		return parseInt(textContent.replace(/,/g, ""));
+	}
 }
 
 function displayFarmingTimesLeft() {
@@ -602,7 +612,7 @@ function AttachEssenceObserver(avrExpPerTick) {
 			var essenceList = trueTarget.parentElement;
 			var currentIndex = Array.prototype.slice.call(essenceList.children).indexOf(trueTarget);
 			var wrapper = essenceList.previousElementSibling.children[currentIndex];
-			var currentEssences = parseFloat(document.getElementsByClassName("essence-list")[0].children[currentIndex].querySelector("span").textContent.replace(/,/g, ""));
+			var currentEssences = getCurrentEssences(currentIndex);
 			var timeTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].firstChild;
 			var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 
