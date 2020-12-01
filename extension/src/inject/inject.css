@@ -2,7 +2,7 @@
 
 /*OVERRIDES*/
 .marketplace-buy-item-top {
-  position:sticky;
+  position:sticky!important;
   top: 0;
   z-index:5;
 }

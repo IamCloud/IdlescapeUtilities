@@ -316,11 +316,11 @@ function AttachScrollingTextObservers(headerId, averageExpPerTick) {
 					var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
 					var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 					var percentTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[2];
-					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1))));
+					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)))) + " left";
 					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)))) + " exp/h ";
 				} else {
 					var extraExp = (averageExpPerTick[i] * GLB_extraPercentExp) / 100;
-					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i] + extraExp));
+					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i] + extraExp)) + " left";
 					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getExpPerHour(wrapper, averageExpPerTick[i] + extraExp)) + " exp/h ";
 				}
 			}
@@ -396,7 +396,7 @@ function displayExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 		timeTooltip.parentElement.parentElement.appendChild(expPerHourElem);
 
 		timeLeftElem.setAttribute("IU-class", "timeleft");
-		timeLeftElem.querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / expPerHour);
+		timeLeftElem.querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / expPerHour) + " left";
 		timeTooltip.parentElement.parentElement.appendChild(timeLeftElem);
 	}
 }
@@ -426,7 +426,7 @@ function displayFishingExpCalcs(remainingExpToLevel) {
 		timeTooltip.parentElement.parentElement.appendChild(expPerHourElem);
 
 		timeLeftElem.setAttribute("IU-class", "timeleft");
-		timeLeftElem.querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / expPerHour);
+		timeLeftElem.querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / expPerHour) + " left";
 		timeTooltip.parentElement.parentElement.appendChild(timeLeftElem);
 	}
 }
@@ -485,13 +485,13 @@ function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 			if (result !== undefined) {
 				neededEssences = (neededEssences * (100 - result.runecraftingPercent)) / 100;
 			}
-			timeLeftToEmptyEssence.querySelector("span").textContent = getTimeLeftText((((currentEssences / neededEssences) * seconds) / 60) / 60) + " to empty";
+			timeLeftToEmptyEssence.querySelector("span").textContent = "Empty " + getTimeLeftText((((currentEssences / neededEssences) * seconds) / 60) / 60);
 			timeTooltip.parentElement.appendChild(timeLeftToEmptyEssence);
 
 
 
 			timeLeftElem.setAttribute("IU-class", "timeleft");
-			timeLeftElem.querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / expPerHour) + " to lvl";
+			timeLeftElem.querySelector("span").textContent = "Lvl " + getTimeLeftText(remainingExpToLevel / expPerHour);
 			timeTooltip.parentElement.appendChild(timeLeftElem);
 			GLB_essenceNeeded = neededEssences;
 		}
@@ -595,7 +595,7 @@ function AttachEssenceObserver(avrExpPerTick) {
 				let timeTooltip = wrapper.querySelectorAll(".resource-as-row-required-resources")[0].firstChild;
 				let seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 				let expPerHour = parseInt(((3600 / seconds) * avrExpPerTick[0]).toFixed(2));
-				timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / expPerHour) + " to lvl";
+				timelefts[i].querySelector("span").textContent = "Lvl " + getTimeLeftText(remainingExpToLevel / expPerHour);
 			}
 
 			var trueTarget = mutations[0].target.parentElement.parentElement;
@@ -608,7 +608,7 @@ function AttachEssenceObserver(avrExpPerTick) {
 
 			var timeLeftsForEmpty = essenceList.previousElementSibling.children[currentIndex].querySelector("[IU-class='timelefttoempty']");
 
-			timeLeftsForEmpty.querySelector("span").textContent = getTimeLeftText((((currentEssences / GLB_essenceNeeded) * seconds) / 60) / 60) + " to empty";
+			timeLeftsForEmpty.querySelector("span").textContent = "Empty " + getTimeLeftText((((currentEssences / GLB_essenceNeeded) * seconds) / 60) / 60);
 		});
 		essenceObserver.observe(element, {
 			characterData: true,
@@ -653,7 +653,7 @@ function getTimeLeftText(timeleftInHours) {
 	if (seconds < 10) {
 		seconds = "0" + seconds;
 	}
-	return hours + ":" + minutes + ":" + seconds + " left";
+	return hours + ":" + minutes + ":" + seconds;
 }
 
 //Modal script
