@@ -5,6 +5,7 @@ var GLB_FarmingTimeDisplay = true;
 var GLB_DisplayExpCalc = true;
 var GLB_MarketHistoryUnitDisplay = true;
 var GLB_essenceNeeded = 400;
+var GLB_RS_START_INDEX = 0;
 var CONST_FISHES = [new Fish("Shrimp", 5, 59.84),
 new Fish("Anchovy", 25, 40.16),
 new Fish("Trout", 50, 59.84),
@@ -266,6 +267,9 @@ var marketplaceObserver;
 function playerAreaChanged(target, observer) {
 	if (scrollingTextObserver) { scrollingTextObserver.disconnect(); }
 	if (marketplaceObserver) { marketplaceObserver.disconnect(); }
+	if (document.querySelector(".buffs-container .buff-christmas")) {
+		GLB_RS_START_INDEX = 1;
+	}
 	var AverageExpPerTick;
 	var remainingExpToLevel;
 	if (GLB_DisplayExpCalc && target.classList.contains("theme-mining")) {
@@ -274,13 +278,14 @@ function playerAreaChanged(target, observer) {
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
 		AttachScrollingTextObservers("miningHeader", AverageExpPerTick);
 	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-foraging") && !target.firstChild.firstChild.classList.contains("farming-container")) {
-		AverageExpPerTick = [10.38, 18.25, 8.08, 38.26, 31.50, 17.94, 52.28, 49.73];
+		AverageExpPerTick = [10.38, 18.25, 8.08, 38.26, 31.50, 17.94, 52.27, 49.73];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("foragingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
 		AttachScrollingTextObservers("foragingHeader", AverageExpPerTick);
 	} else if (GLB_FarmingTimeDisplay && target.classList.contains("theme-foraging") && target.firstChild.firstChild.classList.contains("farming-container")) {
 		displayFarmingTimesLeft();
 	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-smithing")) {
+		GLB_RS_START_INDEX = 0;
 		AverageExpPerTick = [10, 100, 100, 200, 300, 1000, 1500];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("smithingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
@@ -308,7 +313,7 @@ function AttachScrollingTextObservers(headerId, averageExpPerTick) {
 			var expPerHours = document.querySelectorAll("[IU-class='expperhour']");
 			var remainingExpToLevel = parseInt(extractIntFromString(document.getElementById(headerId).querySelectorAll("span")[4].textContent));
 			for (var i = 0; i < timelefts.length; i++) {
-				var wrapper = document.getElementsByClassName("resource-wrapper")[i];
+				var wrapper = document.getElementsByClassName("resource-wrapper")[i+GLB_RS_START_INDEX];
 
 				setGlobalExtraPercentExp();
 
@@ -320,7 +325,7 @@ function AttachScrollingTextObservers(headerId, averageExpPerTick) {
 					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)))) + " exp/h ";
 				} else {
 					var extraExp = (averageExpPerTick[i] * GLB_extraPercentExp) / 100;
-					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i] + extraExp) + " left");
+					timelefts[i].querySelector("span").textContent = getTimeLeftText(remainingExpToLevel / getExpPerHour(wrapper, averageExpPerTick[i] + extraExp)) + " left";
 					expPerHours[i].querySelector("span").textContent = numberWithSpaces(getExpPerHour(wrapper, averageExpPerTick[i] + extraExp)) + " exp/h ";
 				}
 			}
@@ -380,12 +385,13 @@ function setHeatDisplay(goldText) {
 
 function displayExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 	var resourceListWrappers = document.getElementsByClassName("resource-wrapper");
-	for (var i = 0; i < resourceListWrappers.length; i++) {
+
+	for (var i = GLB_RS_START_INDEX; i < resourceListWrappers.length; i++) {
 		var wrapper = document.getElementsByClassName("resource-wrapper")[i];
 		var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
 
-		var extraExp = (AverageExpPerTick[i] * GLB_extraPercentExp) / 100;
-		var expPerHour = getExpPerHour(wrapper, AverageExpPerTick[i] + extraExp);
+		var extraExp = (AverageExpPerTick[i-GLB_RS_START_INDEX] * GLB_extraPercentExp) / 100;
+		var expPerHour = getExpPerHour(wrapper, AverageExpPerTick[i-GLB_RS_START_INDEX] + extraExp);
 
 		var expPerHourElem = timeTooltip.parentElement.cloneNode(true);
 
@@ -403,14 +409,14 @@ function displayExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 
 function displayFishingExpCalcs(remainingExpToLevel) {
 	var resourceListWrappers = document.getElementsByClassName("resource-wrapper");
-	for (var i = 0; i < resourceListWrappers.length; i++) {
+	for (var i = GLB_RS_START_INDEX; i < resourceListWrappers.length; i++) {
 		var wrapper = document.getElementsByClassName("resource-wrapper")[i];
 		var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
 		var percentTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[2];
 
 		var seconds = parseFloat(timeTooltip.querySelector("span").textContent.slice(0, -1));
 
-		var expPerHour = getFishingExpHour(CONST_ZONES[i], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)));
+		var expPerHour = getFishingExpHour(CONST_ZONES[i-GLB_RS_START_INDEX], seconds, parseFloat(percentTooltip.querySelector("span").textContent.slice(0, -1)));
 		if (document.getElementsByClassName("buff-donation")[0]) {
 			expPerHour = expPerHour * 1.20;
 		}
@@ -499,7 +505,7 @@ function displayRunecraftingExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 }
 
 function getCurrentEssences(index) {
-	var textContent = document.getElementsByClassName("essence-list")[0].children[index].querySelector("span").textContent;	
+	var textContent = document.getElementsByClassName("essence-list")[0].children[index].querySelector("span").textContent;
 	if (textContent.includes("M")) {
 		let value = parseFloat(textContent.split(" ")[0]);
 		return parseInt(value * 1000000);

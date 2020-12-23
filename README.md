@@ -1,5 +1,5 @@
 # IdlescapeUtilities
- Chrome extension for Idlescape Quality of life.
+ Browser extension for Idlescape Quality of life.
  ![Overview](./fullscreen.png?raw=true "Overview")
 ## Features:
 1. Display gold and heat in full. (1,920,000 instead of 1M). Updates instantly when you lose or gain money.
