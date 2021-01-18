@@ -159,6 +159,22 @@ function LoadScript() {
 		addPlayerAreaObserverIfNeeded();
 	});
 
+	chrome.storage.local.get(['playSoundOnIdle'], function (result) {
+
+		if (result.playSoundOnIdle === undefined) {
+			chrome.storage.local.set({ "playSoundOnIdle": false });
+		} else {
+			if (result.playSoundOnIdle) {
+				var checkExist = setInterval(function () {
+					var status = document.getElementsByClassName("status-action")[0].innerHTML
+					if (~status.toLowerCase().indexOf('idling')) {
+						var audio = new Audio('https://soundbible.com//mp3/service-bell_daniel_simion.mp3'); // Edit sound here
+						audio.play();
+					}
+				}, 10000);
+			}
+		}
+	});
 
 
 
@@ -698,6 +714,10 @@ function initModalScript() {
 	chrome.storage.local.get(['marketHistoryByUnit'], function (result) {
 		document.getElementById("marketHistoryByUnit").checked = result.marketHistoryByUnit;
 	});
+	chrome.storage.local.get(['playSoundOnIdle'], function (result) {
+		document.getElementById("playsoundonidle").checked = result.playSoundOnIdle;
+	});
+
 	document.getElementById("golddisplay").addEventListener("input", function (checkbox) {
 		chrome.storage.local.set({ "goldFullDisplay": checkbox.target.checked }, function () {
 			userPrefChanged();
@@ -720,6 +740,11 @@ function initModalScript() {
 	});
 	document.getElementById("farmingtimes").addEventListener("input", function (checkbox) {
 		chrome.storage.local.set({ "farmingTimeDisplay": checkbox.target.checked }, function () {
+			userPrefChanged();
+		});
+	});
+	document.getElementById("playsoundonidle").addEventListener("input", function (checkbox) {
+		chrome.storage.local.set({ "playSoundOnIdle": checkbox.target.checked }, function () {
 			userPrefChanged();
 		});
 	});
