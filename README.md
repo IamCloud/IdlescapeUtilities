@@ -12,6 +12,7 @@
     * ![Runecrafting](./Runecrafting.PNG?raw=true "Runecrafting")
 1. Marketplace history cost/unit
     * ![Marketplace](./MarketplaceHistory.PNG?raw=true "Market")
+1. Sound notification when idle
 
 ## How to install
 You can simply download the app in the chrome store: https://chrome.google.com/webstore/detail/idlescape-utilities/pcmnipemclfhflggbglfaampaakhfcdp

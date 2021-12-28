@@ -5,7 +5,6 @@ var GLB_FarmingTimeDisplay = true;
 var GLB_DisplayExpCalc = true;
 var GLB_MarketHistoryUnitDisplay = true;
 var GLB_essenceNeeded = 400;
-var GLB_IGNORED_RS_END = 0;
 var CONST_FISHES = [new Fish("Shrimp", 5, 59.84),
 new Fish("Anchovy", 25, 40.16),
 new Fish("Trout", 50, 59.84),
@@ -291,9 +290,6 @@ var marketplaceObserver;
 function playerAreaChanged(target, observer) {
 	if (scrollingTextObserver) { scrollingTextObserver.disconnect(); }
 	if (marketplaceObserver) { marketplaceObserver.disconnect(); }
-	if (document.querySelector(".buffs-container .buff-christmas")) {
-		GLB_IGNORED_RS_END = 1;
-	}
 	var AverageExpPerTick;
 	var remainingExpToLevel;
 	if (GLB_DisplayExpCalc && target.classList.contains("theme-mining")) {
@@ -309,15 +305,14 @@ function playerAreaChanged(target, observer) {
 	} else if (GLB_FarmingTimeDisplay && target.classList.contains("theme-foraging") && target.firstChild.firstChild.classList.contains("farming-container")) {
 		displayFarmingTimesLeft();
 	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-smithing")) {
-		GLB_IGNORED_RS_END = 0;
 		AverageExpPerTick = [10, 100, 100, 200, 300, 1000, 1500];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("smithingHeader").querySelectorAll("span")[4].textContent));
 		displayExpCalcs(AverageExpPerTick, remainingExpToLevel);
 		AttachScrollingTextObservers("smithingHeader", AverageExpPerTick);
-	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-fishing")) {
-		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("fishingHeader").querySelectorAll("span")[4].textContent));
-		displayFishingExpCalcs(remainingExpToLevel);
-		AttachScrollingTextObservers("fishingHeader");
+	// } else if (GLB_DisplayExpCalc && target.classList.contains("theme-fishing")) {
+	// 	remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("fishingHeader").querySelectorAll("span")[4].textContent));
+	// 	displayFishingExpCalcs(remainingExpToLevel);
+	// 	AttachScrollingTextObservers("fishingHeader");
 	} else if (GLB_DisplayExpCalc && target.classList.contains("theme-runecrafting")) {
 		AverageExpPerTick = [100];
 		remainingExpToLevel = parseInt(extractIntFromString(document.getElementById("runecraftingHeader").querySelectorAll("span")[4].textContent));
@@ -408,9 +403,7 @@ function setHeatDisplay(goldText) {
 }
 
 function displayExpCalcs(AverageExpPerTick, remainingExpToLevel) {
-	var resourceListWrappers = document.getElementsByClassName("resource-wrapper");
-
-	for (var i = 0; i < resourceListWrappers.length - GLB_IGNORED_RS_END; i++) {
+	for (var i = 0; i < AverageExpPerTick.length; i++) {
 		var wrapper = document.getElementsByClassName("resource-wrapper")[i];
 		var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
 
@@ -433,7 +426,7 @@ function displayExpCalcs(AverageExpPerTick, remainingExpToLevel) {
 
 function displayFishingExpCalcs(remainingExpToLevel) {
 	var resourceListWrappers = document.getElementsByClassName("resource-wrapper");
-	for (var i = 0; i < resourceListWrappers.length - GLB_IGNORED_RS_END; i++) {
+	for (var i = 0; i < resourceListWrappers.length; i++) {
 		var wrapper = document.getElementsByClassName("resource-wrapper")[i];
 		var timeTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[1];
 		var percentTooltip = wrapper.querySelectorAll(".resource-node-time-tooltip")[2];
